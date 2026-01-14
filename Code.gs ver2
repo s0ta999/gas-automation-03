@@ -1,0 +1,45 @@
+function cleanupOldYoutubeMails() {
+
+  const now = new Date();
+
+  const ONE_DAY  = 1 * 24 * 60 * 60 * 1000;
+  const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+
+  let deletedCount = 0;
+
+  /* ===== 通常通知：1日で削除 ===== */
+  const normalQuery = 'subject:(YouTube新着動画通知)';
+  const normalThreads = GmailApp.search(normalQuery);
+
+  normalThreads.forEach(thread => {
+    thread.getMessages().forEach(message => {
+
+      if (message.isStarred()) return;
+
+      const diff = now - message.getDate();
+      if (diff >= ONE_DAY) {
+        message.moveToTrash();
+        deletedCount++;
+      }
+    });
+  });
+
+  /* ===== 朝まとめ：2日で削除 ===== */
+  const morningQuery = 'subject:(【朝まとめ】YouTube新着動画)';
+  const morningThreads = GmailApp.search(morningQuery);
+
+  morningThreads.forEach(thread => {
+    thread.getMessages().forEach(message => {
+
+      if (message.isStarred()) return;
+
+      const diff = now - message.getDate();
+      if (diff >= TWO_DAYS) {
+        message.moveToTrash();
+        deletedCount++;
+      }
+    });
+  });
+
+  Logger.log(`削除完了: ${deletedCount} 件`);
+}
